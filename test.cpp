@@ -172,8 +172,8 @@ microbenchmark(
 NumericVector rangeC(NumericVector x) {
     int n = x.size();
     NumericVector res(2);
-    int minimum;
-    int maximum;
+    double minimum;
+    double maximum;
 
     minimum = x[0];
     maximum = x[0];
@@ -204,5 +204,47 @@ x <- runif(1e6)
 microbenchmark(
  range(x),
  rangeC(x)
+)
+*/
+
+// [[Rcpp::export]]
+double varC(NumericVector x) {
+    int n = x.size();
+    double var;
+    
+    //estimate mean
+    double mean;
+
+    for (int i=0; i<n; i++){
+        mean += x[i];
+    }
+    mean = mean / n;
+    
+    //estimate difference
+    NumericVector diff(n);
+
+    for (int i=0; i<n; i++){
+        diff[i] = pow(x[i] - mean, 2.0); 
+    }
+    
+    //estimate sum of squared differences
+
+    for (int i=0; i<n; i++){
+        var += diff[i];
+    }
+    var = var / n;
+
+    return var;
+
+}
+
+
+/*** R
+library(microbenchmark)
+x <- runif(1e6)
+
+microbenchmark(
+ var(x),
+ varC(x)
 )
 */

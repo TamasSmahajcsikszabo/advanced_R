@@ -39,7 +39,13 @@ diff(1:10)
 
 
 # range implementation in C++/R
-x <- c(-1,6,2,0,2,6,2,2,-2)
+x <- rnorm(1e8)
 range(x)
 rangeC(x)
 
+
+# var implementation in C++/R
+x <- rnorm(1e2)
+x <- 1:100
+var(x)
+varC(x)
