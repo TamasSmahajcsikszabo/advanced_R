@@ -1,4 +1,5 @@
 library(Rcpp)
+data(mtcars)
 
 sourceCpp("./test.cpp")
 
@@ -49,3 +50,8 @@ x <- rnorm(1e2)
 x <- 1:100
 var(x)
 varC(x)
+
+attribs()
+
+mod  <- lm(mpg ~ wt, data = mtcars)
+mpe(mod)

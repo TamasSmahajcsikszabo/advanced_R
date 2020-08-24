@@ -248,3 +248,42 @@ microbenchmark(
  varC(x)
 )
 */
+
+
+// [[Rcpp::export]]
+NumericVector attribs() {
+    NumericVector out = NumericVector::create(1, 2, 3);
+    
+    out.names() = CharacterVector::create("a", "b", "c");
+    out.attr("my-attr") = "my-value";
+    out.attr("class") = "my-class";
+    
+    return out;
+}
+
+// working with S3 classes
+
+// extracting mean percentage error from an lm() object
+// using .inherits() and stops() to check certain criteria
+// as() is used to convert extracted R components to their C++ equivalents
+
+// [[Rcpp::export]]
+double mpe(List mod) {
+    if (!mod.inherits("lm")) stop("Input must be a linear model");
+
+    NumericVector resid = as<NumericVector>(mod["residuals"]);
+    NumericVector fitted = as<NumericVector>(mod["fitted.values"]);
+
+    int n = resid.size();
+    double err = 0;
+
+    for (int i=0; i<n; ++i) {
+    err += resid[i] / (fitted[i] + resid[i]);
+    }
+    return err / n;
+}
+
+
+// using functions with Rcpp
+
+
