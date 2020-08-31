@@ -1,4 +1,7 @@
 #include <Rcpp.h>
+#include <iterator>
+#include <numeric>
+#include <algorithm>
 using namespace Rcpp;
 
 
@@ -364,3 +367,53 @@ NumericVector cumsumC(NumericVector x, bool narm=true) {
     return res;
 }
 
+//Rcpp sugar
+
+// [[Rcpp::export]]
+bool any_naC(NumericVector x) {
+    // performs lazy evaluation, checks first value and stops if NA
+    return is_true(any(is_na(x)));
+}
+
+
+//STL
+//standard template library
+//using iterators
+
+// [[Rcpp::export]]
+double sumC2(NumericVector x) {
+    double total = 0;
+
+
+    NumericVector::iterator it;
+    for(it = x.begin(); it != x.end(); ++it) {
+    total += *it;
+    }
+    return total;
+}
+
+// apply functions can also be used by STL
+// it needs the 'numeric' header!
+// [[Rcpp::export]]
+double sumc3(NumericVector x) {
+    return std::accumulate(x.begin(), x.end(), 0.0) // third parameter format gives output and operation format!!!
+}
+
+
+// [[Rcpp::export]]
+IntegerVector findinterval2(NumericVector x, NumericVector breaks) {
+    IntegerVector out(x.size());
+
+    NumericVector::iterator it, pos;
+    IntegerVector::iterator out_it;
+
+    for(it = x.begin(), out_it = out.begin(); it != x.end(); ++it, ++out_it) {
+        pos = std::upper_bound(breaks.begin(), breaks.end(), *it);
+        *out_it = std::distance(breaks.begin(), pos);
+    }
+    return out; 
+}
+
+//STL vectors: templated, need to specify object type
+// accepts [] filtering and .push_back() for adding new element
+// .reserve() is used for storage allocation

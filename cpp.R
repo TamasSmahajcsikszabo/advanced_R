@@ -88,3 +88,11 @@ var(x, na.rm = TRUE)
 x <- c(-1,6,2,0,2,6,2,2,-2, NA, NA)
 diff(x, 2)
 diffC(x, 2)
+
+
+
+x <-  rnorm(100)
+mask <- sample(c(TRUE, FALSE), 100, replace=TRUE)
+x[mask] <- NA
+cumsum(x)
+cumsumC(x)
