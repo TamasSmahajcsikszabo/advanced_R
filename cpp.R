@@ -55,3 +55,36 @@ attribs()
 
 mod  <- lm(mpg ~ wt, data = mtcars)
 mpe(mod)
+
+# calling functions from C++
+x <- rnorm(100)
+callC(mean, x)
+lapplyC(x, function(x) x+1)
+
+# check for missing values
+x <- c(1, 2, 3, 4, NA)
+is_naC(x)
+
+
+# exercises
+x  <-  c(NA, 1, 2, NA, 4, 5, NA)
+is_naC(x)
+treat_missing(x, narm = TRUE)
+treat_missing(x, narm = FALSE)
+
+meanC(x, narm=FALSE)
+meanC(x, narm=TRUE)
+
+
+x <-  rnorm(100)
+mask <- sample(c(TRUE, FALSE), 100, replace=TRUE)
+x[mask] <- NA
+varC(x, narm=TRUE)
+varC(x, narm=FALSE)
+var(x)
+var(x, na.rm = TRUE)
+
+
+x <- c(-1,6,2,0,2,6,2,2,-2, NA, NA)
+diff(x, 2)
+diffC(x, 2)

@@ -2,27 +2,28 @@
 using namespace Rcpp;
 
 
-// double meanC(NumericVector x) {
-//   int n = x.size();
-//    double total = 0;
-//   
-//    for (int i=0;i<n;i++) {
-//    total += x[i];
-//    }
+// [[Rcpp::export]]
+double meanC(NumericVector x) {
+    int n = x.size();
+    double total = 0;
+   
+    for (int i=0;i<n;i++) {
+    total += x[i];
+    }
     
-//    return total/n;
+    return total/n;
 
-//}
+}
 
-// /*** R
-//library(microbenchmark)
-//x <- runif(1e6)
+/*** R
+library(microbenchmark)
+x <- runif(1e6)
 
-//microbenchmark(
-// mean(x),
-// meanC(x)
-//)
-// */
+microbenchmark(
+ mean(x),
+ meanC(x)
+)
+*/
 
 
 // [[Rcpp::export]]
@@ -139,6 +140,34 @@ microbenchmark(
 */
 
 
+
+// [[Rcpp::export]]
+NumericVector diffC(NumericVector x, int lag=1) {
+    int n = x.size();
+    NumericVector res(n-lag);
+    double d;
+
+
+    for (int i=0; i<n-lag; i++){
+        d = x[i+lag] - x[i];
+        res[i] = d; 
+    }
+    
+    return res;
+}
+
+
+/*** R
+library(microbenchmark)
+x <- runif(1e6)
+
+microbenchmark(
+ diff(x),
+ diffC(x,1)
+)
+*/
+
+
 // [[Rcpp::export]]
 NumericVector rangeC(NumericVector x) {
     int n = x.size();
@@ -175,6 +204,48 @@ x <- runif(1e6)
 microbenchmark(
  range(x),
  rangeC(x)
+)
+*/
+
+// [[Rcpp::export]]
+double varC(NumericVector x) {
+    int n = x.size();
+    double var;
+    
+    //estimate mean
+    double mean;
+
+    for (int i=0; i<n; i++){
+        mean += x[i];
+    }
+    mean = mean / n;
+    
+    //estimate difference
+    NumericVector diff(n);
+
+    for (int i=0; i<n; i++){
+        diff[i] = pow(x[i] - mean, 2.0); 
+    }
+    
+    //estimate sum of squared differences
+
+    for (int i=0; i<n; i++){
+        var += diff[i];
+    }
+    var = var / n;
+
+    return var;
+
+}
+
+
+/*** R
+library(microbenchmark)
+x <- runif(1e6)
+
+microbenchmark(
+ var(x),
+ varC(x)
 )
 */
 
@@ -262,105 +333,21 @@ NumericVector treat_missing(NumericVector x, bool narm) {
 
     for (int i=0; i<n; i++){
         if (missing_vector[i] == true) {
-            missing = missing + 1;
+            missing++;
         }
     }
 
     if (narm == true) {
-        int new_n;
-        new_n = n - missing;
-        NumericVector new_x(new_n);
-        int c=-1;
+        NumericVector new_x(n-missing);
         for (int i=0; i<n; i++){
-            if (missing_vector[i] == false) {
-            c = c+1;
-            new_x[c] = x[i];
+            if (missing_vector[x] == true) {
+            new_x[i] = x[i];
             }
         }
-        return new_x;
     } else {
         NumericVector new_x(n);
         new_x = x;
-        return new_x;
     } 
+
+    return new_x;
 }
-
-// [[Rcpp::export]]
-double meanC(NumericVector x, bool narm) {
-    double total = 0;
-    x = treat_missing(x, narm=narm); 
-    int n = x.size();
-
-    for (int i=0;i<n;i++) {
-    total += x[i];
-    }
-    
-    return total/n;
-
-}
-
-// [[Rcpp::export]]
-double varC(NumericVector x, bool narm) {
-    x = treat_missing(x, narm=narm); 
-    int n = x.size();
-    double var;
-    
-    //estimate mean
-    double mean;
-
-    for (int i=0; i<n; i++){
-        mean += x[i];
-    }
-    mean = mean / n;
-    
-    //estimate difference
-    NumericVector diff(n);
-
-    for (int i=0; i<n; i++){
-        diff[i] = pow(x[i] - mean, 2.0); 
-    }
-    
-    //estimate sum of squared differences
-
-    for (int i=0; i<n; i++){
-        var += diff[i];
-    }
-    var = var / n;
-
-    return var;
-
-}
-
-// [[Rcpp::export]]
-NumericVector diffC(NumericVector x, int lag=1, bool narm=true) {
-    x = treat_missing(x, narm=narm); 
-    int n = x.size();
-    NumericVector res(n-lag);
-    double d;
-
-
-    for (int i=0; i<n-lag; i++){
-        d = x[i+lag] - x[i];
-        res[i] = d; 
-    }
-    
-    return res;
-}
-
-
-// [[Rcpp::export]]
-NumericVector cumsumC(NumericVector x, bool narm=true) {
-    x = treat_missing(x, narm=narm); 
-    int n = x.size();
-    NumericVector res(n);
-    double sum;
-    
-    sum = x[0];
-    for (int i=0; i<n; i++){
-    sum = sum + x[i];
-    res[i] = sum;
-    }
-    
-    return res;
-}
-
